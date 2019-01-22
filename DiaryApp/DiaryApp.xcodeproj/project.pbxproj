@@ -101,7 +101,6 @@
 				C9F0DBC121EFB56300F9DC2E /* Model */,
 				C9F4912D21ECFD5E001B671A /* Controller */,
 				C944703121EE1BB9002BF130 /* Helper */,
-				C9F4912E21ECFD6C001B671A /* DataSource */,
 				C9F4911821ECD115001B671A /* AppDelegate.swift */,
 				C9F4912221ECD116001B671A /* Assets.xcassets */,
 				C9F4912421ECD116001B671A /* LaunchScreen.storyboard */,
@@ -119,13 +118,6 @@
 				C9D3DC9621F60479000C0FBC /* LocationPickerController.swift */,
 			);
 			path = Controller;
-			sourceTree = "<group>";
-		};
-		C9F4912E21ECFD6C001B671A /* DataSource */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = DataSource;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
