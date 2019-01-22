@@ -10,17 +10,12 @@ import UIKit
 import MapKit
 import CoreData
 
-protocol BackPress {
-    func didPressBack()->Void
-}
-
-protocol SavePress {
+protocol SavePressProtocol {
     func didPressSave()->Void
 }
 
+class DiaryEntryFormController: UIViewController{
 
-class DiaryEntryFormController: UIViewController {
-    
     enum Mood: String{
         case bad,average,good
     }
@@ -31,23 +26,24 @@ class DiaryEntryFormController: UIViewController {
         case red = 0xA5330C
     }
 
-    @IBOutlet weak var diaryImage: UIImageView!
     @IBOutlet weak var diaryDateLabel: UILabel!
-    @IBOutlet weak var addLocationBtn: UIButton!
     @IBOutlet weak var diaryText: UITextView!
+    @IBOutlet weak var diaryImage: UIImageView!
+    @IBOutlet weak var addLocationBtn: UIButton!
     @IBOutlet weak var badMoodBtn: UIButton!
     @IBOutlet weak var averageMoodBtn: UIButton!
     @IBOutlet weak var goodMoodBtn: UIButton!
     
     let locationManager = CLLocationManager()
     
-    var backProtocol: BackPress?
-    var saveProtocol: SavePress?
+    var saveProtocol: SavePressProtocol?
     
     //Place holder for objects received from DiaryListController
     var entry: Entry?
     var context: NSManagedObjectContext?
-    var indexPath: Int?
+//    var indexPath: Int?
+    var mood:String?
+    var location:String?
     
     //This is needed to prevent crashing.
     var photo: UIImage?
@@ -92,7 +88,6 @@ class DiaryEntryFormController: UIViewController {
         let averageMoodSelector = UITapGestureRecognizer(target: self, action: #selector(self.average(_:)))
         let goodMoodSelector = UITapGestureRecognizer(target: self, action: #selector(self.good(_:)))
         let dismissKeyboard = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard(_:)))
-        
         addLocationBtn.addGestureRecognizer(mapPicker)
         diaryImage.isUserInteractionEnabled = true
         diaryImage.addGestureRecognizer(cameraPicker)
@@ -102,25 +97,19 @@ class DiaryEntryFormController: UIViewController {
         goodMoodBtn.addGestureRecognizer(goodMoodSelector)
         view.addGestureRecognizer(dismissKeyboard)
         
-        //Display entry date, image, text, location, mood button for a selected entry.
-        if let entry = entry,let today = entry.date as? Date {
-            diaryDateLabel.text = today.fullDate
-        }
-        if let entry = self.entry, let text = entry.text{
-            diaryText.text = text
-        }else{
-            diaryText.text = "Enter your thoughts here..."
-            diaryText.textColor = .gray
-        }
-        if let entry = self.entry, let image = entry.image{
-            print("Entry image received")
-            diaryImage.image = sizeImage(UIImage(data: image as Data)!)
-        }else{
-            diaryImage.image = displayImage
-        }
-        if let entry = self.entry, let mood = entry.mood{
-            print("Entry mood is: \(mood)")
-            switch mood {
+        //Entry selected from DiaryListController
+        if let entry = entry{
+            diaryDateLabel.text = entry.date.fullDate
+            diaryText.text = entry.text
+            diaryImage.image = entry.uiImage
+
+            if let location = entry.location{
+                addLocationBtn.setTitle("\(location)", for: .normal)
+            }else{
+                addLocationBtn.setTitle("Add location", for: .normal)
+            }
+            
+            switch entry.mood {
             case Mood.bad.rawValue:
                 badMoodBtn.backgroundColor = .gray
                 averageMoodBtn.backgroundColor = UIColor(rgb:Color.purple.rawValue)
@@ -136,14 +125,13 @@ class DiaryEntryFormController: UIViewController {
             default:
                 return
             }
+        //Add a new entry from DiaryListController
+        }else{
+            diaryDateLabel.text = Date().fullDate
+            diaryText.text = "Enter your thoughts here..."
+            diaryText.textColor = .gray
         }
-
-        //Get access to the DiaryListController
-        guard let diaryListController = storyboard?.instantiateViewController(withIdentifier: "DiaryListController") as? DiaryListController else { return }
-        
-        //Set the DiaryListController to reference of the protocols. DiaryListController needs to adopt these protocols to implement the methods.
-        backProtocol = diaryListController
-        saveProtocol = diaryListController
+        diaryText.delegate = self
     }
     
     @objc func back() {
@@ -151,44 +139,37 @@ class DiaryEntryFormController: UIViewController {
         //Note: if push is used to display the controller pop is required to dismiss it.
         navigationController?.popViewController(animated: true)
         dismiss(animated: true, completion: nil)
-        //Activiate the protocol func
-        backProtocol?.didPressBack()
     }
     
     @objc func saveEntry() {
         print("Save Entry")
         
-        guard let context = context else {return}
-        guard let entry = entry else {return}
-        
-        //Save properties of the model to core data
-        if let image = entry.image {
-            entry.setValue(image, forKey: "image")
-        }else{
-            let imageData = UIImage(named: "icn_picture")?.jpegData(compressionQuality: 1.0)! as! NSData
-            entry.setValue(imageData, forKey: "image")
-        }
-        if let text = entry.text {
-            entry.setValue(text, forKey: "text")
-        }else{
-            entry.setValue("No text", forKey: "text")
-        }
-        if let mood = entry.mood {
-            entry.setValue(mood, forKey: "mood")
-        }else{
-            entry.setValue("No mood", forKey: "mood")
-        }
-        if let lat = entry.lat {
-            entry.setValue(lat, forKey: "lat")
-        }else{
-            entry.setValue(0.0, forKey: "lat")
-        }
-        if let lng = entry.lng {
-            entry.setValue(lng, forKey: "lng")
-        }else{
-            entry.setValue(0.0, forKey: "lng")
-        }
+        guard let context = context, let text = diaryText.text else {return}
 
+        //Get the location from add location button title
+        if let locationName = addLocationBtn.title(for: .normal){
+            location = locationName
+        }else{
+            location = "Add location"
+        }
+        
+        //Get the mood from buttons background
+        if badMoodBtn.backgroundColor == .gray {
+            mood = Mood.bad.rawValue
+        }else if averageMoodBtn.backgroundColor == .gray {
+            mood = Mood.average.rawValue
+        }else if goodMoodBtn.backgroundColor == .gray {
+            mood = Mood.good.rawValue
+        }
+        
+        if let entry = entry {
+            print("Updated entry \(entry.text)")
+            let _ = Entry.update(entry, text: text, image: diaryImage.image, mood: mood, location: location, in: context)
+        } else {
+            print("Crated a new entry")
+            let _ = Entry.createWith(text: text, image: diaryImage.image, mood: mood, location: location, in: context)
+        }
+        
         //Apply save data to core data
         context.saveChanges()
         
@@ -196,16 +177,18 @@ class DiaryEntryFormController: UIViewController {
         navigationController?.popViewController(animated: true)
         dismiss(animated: true, completion: nil)
     
-        //Notify DiaryListController that save button was pressed.
+        //Notify DiaryListController that save button was pressed
         saveProtocol?.didPressSave()
     }
     
     @objc func mapPicker(_ sender: UITapGestureRecognizer){
         print("Navigate to map picker")
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.requestLocation()
+
+        guard let locationPickerController = storyboard?.instantiateViewController(withIdentifier: "LocationPickerController") as? LocationPickerController else { return }
+        
+        //NOTE: Activate the location picker delegate here instead of the location picker itself.
+        locationPickerController.storeLocation = self
+        navigationController?.pushViewController(locationPickerController, animated: true)
     }
     
     @objc func camera(_ sender: UITapGestureRecognizer){
@@ -215,9 +198,7 @@ class DiaryEntryFormController: UIViewController {
 
     @objc func bad(_ sender: UITapGestureRecognizer){
         print("Feeling bad")
-        guard let entry = entry else {return}
-        entry.mood = Mood.bad.rawValue
-
+        mood = Mood.bad.rawValue
         badMoodBtn.backgroundColor = .gray
         averageMoodBtn.backgroundColor = UIColor(rgb:Color.purple.rawValue)
         goodMoodBtn.backgroundColor = UIColor(rgb:Color.green.rawValue)
@@ -225,9 +206,7 @@ class DiaryEntryFormController: UIViewController {
     
     @objc func average(_ sender: UITapGestureRecognizer){
         print("Feeling average")
-        guard let entry = entry else {return}
-        entry.mood = Mood.average.rawValue
-        
+        mood = Mood.average.rawValue
         badMoodBtn.backgroundColor = UIColor(rgb: Color.red.rawValue)
         averageMoodBtn.backgroundColor = .gray
         goodMoodBtn.backgroundColor = UIColor(rgb: Color.green.rawValue)
@@ -235,9 +214,7 @@ class DiaryEntryFormController: UIViewController {
     
     @objc func good(_ sender: UITapGestureRecognizer){
         print("Feeling good")
-        guard let entry = entry else {return}
-        entry.mood = Mood.good.rawValue
-
+        mood = Mood.good.rawValue
         badMoodBtn.backgroundColor = UIColor(rgb: Color.red.rawValue)
         averageMoodBtn.backgroundColor = UIColor(rgb: Color.purple.rawValue)
         goodMoodBtn.backgroundColor = .gray
@@ -264,8 +241,8 @@ extension DiaryEntryFormController: PhotoPickerManagerDelegate {
             //Display resized image on view controller.
             self.diaryImage.image = self.sizeImage(image)
             //Store image in entry object.
-            guard let entry = self.entry else {return}
-            entry.image = image.pngData() as NSData?
+//            guard let entry = self.entry else {return}
+//            entry.image = image.pngData() as NSData?
         }
     }
     
@@ -282,29 +259,25 @@ extension DiaryEntryFormController: PhotoPickerManagerDelegate {
     }
 }
 
-//This extension is used to get the current location of the user.
-//Tutorial: https://www.thorntech.com/2016/01/how-to-search-for-location-using-apples-mapkit/
-extension DiaryEntryFormController : CLLocationManagerDelegate {
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("error: \(error.localizedDescription)")
-    }
-    
-    //This method gets called when the user responds to the permission dialog. If the user chose Allow, the status becomes CLAuthorizationStatus.AuthorizedWhenInUse.
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedWhenInUse {
-            locationManager.requestLocation()
+extension DiaryEntryFormController: UITextViewDelegate{
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.textColor == .gray {
+            textView.text = nil
+            textView.textColor = .black
         }
     }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.isEmpty {
+            textView.text = "What happened today?"
+            textView.textColor = .gray
+        }
+    }
+}
 
-    //This gets called when location information comes back. You get an array of locations, but you’re only interested in the first item.
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if locations.first != nil {
-            print("Current location: \(String(describing: locations.first))")
-            guard let entry = entry else {return}
-            entry.lat = locations.first?.coordinate.latitude as NSNumber?
-            entry.lng = locations.first?.coordinate.longitude as NSNumber?
-            addLocationBtn.setTitle(entry.locationName, for: .normal)
-        }
+extension DiaryEntryFormController:StoreLocationProtocol{
+    func didGetCurrentLocation(_ location: String) {
+        print("Location received from location picker: \(location)")
+        addLocationBtn.setTitle(" \(location)", for: .normal)
     }
 }

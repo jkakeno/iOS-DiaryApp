@@ -44,6 +44,8 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Used to take photos</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app wants to use your location</string>
+	<string>This information is required to show your current location</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Always mode is recommended for this app for improved location tracking</string>
 </dict>
 </plist>

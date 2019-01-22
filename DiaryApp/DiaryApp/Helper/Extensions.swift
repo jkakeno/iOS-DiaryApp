@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+//Extensions to format Date to String
 extension Date {
     func localizedDescription(dateStyle: DateFormatter.Style = .medium,
                               timeStyle: DateFormatter.Style = .medium,
@@ -30,6 +31,7 @@ extension Date {
     var shortTime: String { return localizedDescription(dateStyle: .none, timeStyle: .short)   }
     var fullDateTime:  String { return localizedDescription(dateStyle: .full, timeStyle: .full)  }
     var shortDateTime: String { return localizedDescription(dateStyle: .short, timeStyle: .short)  }
+    
 }
 
 extension TimeZone {
@@ -39,6 +41,7 @@ extension Formatter {
     static let date = DateFormatter()
 }
 
+//Extension to resize a UIImage
 extension UIImage {
     func resized(to size: CGSize) -> UIImage? {
         //Create a rectangle.
@@ -61,6 +64,7 @@ extension UIImage {
     }
 }
 
+//Extension to round the image view
 extension UIImageView{
     func roundImage(){
         //Make round image
@@ -70,7 +74,7 @@ extension UIImageView{
     }
 }
 
-
+//Extension to color view by entering a rgb value
 //https://stackoverflow.com/questions/24263007/how-to-use-hex-color-values
 extension UIColor {
     convenience init(red: Int, green: Int, blue: Int) {

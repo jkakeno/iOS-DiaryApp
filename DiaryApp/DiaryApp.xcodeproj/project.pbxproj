@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C944703021EE1243002BF130 /* PhotoPickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C944702F21EE1243002BF130 /* PhotoPickerManager.swift */; };
 		C944703521EE4B47002BF130 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C944703421EE4B47002BF130 /* Extensions.swift */; };
+		C9D3DC9721F60479000C0FBC /* LocationPickerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D3DC9621F60479000C0FBC /* LocationPickerController.swift */; };
 		C9F0DBC321EFB5D100F9DC2E /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F0DBC221EFB5D100F9DC2E /* Entry.swift */; };
 		C9F0DBC521EFCF0700F9DC2E /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F0DBC421EFCF0700F9DC2E /* CoreDataStack.swift */; };
 		C9F0DBCC21EFD40400F9DC2E /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F0DBCB21EFD40400F9DC2E /* Cell.swift */; };
@@ -24,6 +25,7 @@
 /* Begin PBXFileReference section */
 		C944702F21EE1243002BF130 /* PhotoPickerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPickerManager.swift; sourceTree = "<group>"; };
 		C944703421EE4B47002BF130 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		C9D3DC9621F60479000C0FBC /* LocationPickerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerController.swift; sourceTree = "<group>"; };
 		C9F0DBC221EFB5D100F9DC2E /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
 		C9F0DBC421EFCF0700F9DC2E /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		C9F0DBCB21EFD40400F9DC2E /* Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
@@ -106,7 +108,7 @@
 				C9F4912721ECD116001B671A /* Info.plist */,
 				C9F4911F21ECD115001B671A /* iOS_DiaryApp.xcdatamodeld */,
 			);
-			path = "DiaryApp";
+			path = DiaryApp;
 			sourceTree = "<group>";
 		};
 		C9F4912D21ECFD5E001B671A /* Controller */ = {
@@ -114,6 +116,7 @@
 			children = (
 				C9F4911A21ECD115001B671A /* DiaryListController.swift */,
 				C9F4913121ED10BA001B671A /* DiaryEntryFormController.swift */,
+				C9D3DC9621F60479000C0FBC /* LocationPickerController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -141,7 +144,7 @@
 			dependencies = (
 			);
 			name = DiaryApp;
-			productName = "DiaryApp";
+			productName = DiaryApp;
 			productReference = C9F4911521ECD115001B671A /* DiaryApp.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -198,6 +201,7 @@
 			files = (
 				C9F0DBC321EFB5D100F9DC2E /* Entry.swift in Sources */,
 				C9F4913221ED10BA001B671A /* DiaryEntryFormController.swift in Sources */,
+				C9D3DC9721F60479000C0FBC /* LocationPickerController.swift in Sources */,
 				C9F4912121ECD115001B671A /* iOS_DiaryApp.xcdatamodeld in Sources */,
 				C9F0DBC521EFCF0700F9DC2E /* CoreDataStack.swift in Sources */,
 				C9F0DBCC21EFD40400F9DC2E /* Cell.swift in Sources */,
@@ -352,12 +356,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TK9NBZDJW8;
-				INFOPLIST_FILE = "DiaryApp/Info.plist";
+				INFOPLIST_FILE = DiaryApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "junkakeno.DiaryApp";
+				PRODUCT_BUNDLE_IDENTIFIER = junkakeno.DiaryApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -370,12 +374,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TK9NBZDJW8;
-				INFOPLIST_FILE = "DiaryApp/Info.plist";
+				INFOPLIST_FILE = DiaryApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "junkakeno.DiaryApp";
+				PRODUCT_BUNDLE_IDENTIFIER = junkakeno.DiaryApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";

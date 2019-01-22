@@ -40,7 +40,6 @@ class DiaryListController: UIViewController {
     }()
     
     let context = CoreDataStack().managedObjectContext
-    var backPressed:Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,19 +63,15 @@ class DiaryListController: UIViewController {
         
         //TODO-NOTE: When the diary text is more than 1 full row and the entry saved the entry gets saved in core data but it doesn't show on table view. Look into saving logic of core data for this case and story board to show text up to a certain height.
 
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        print("Diary List View did appear")
-        //Temporary so that table updates with data when returning from DairyEntryFormController.
         updateTableView()
     }
 
     @objc func addEntry(_ sender: UITapGestureRecognizer){
-        print("Add entry for \(today)")
+        print("Add a new entry for \(today)")
         guard let diaryEntryFormController = storyboard?.instantiateViewController(withIdentifier: "DiaryEntryFormController") as? DiaryEntryFormController else { return }
-        diaryEntryFormController.entry = Entry.with(Date() as NSDate, image: nil, text: nil, lat: nil, lng: nil, mood: nil, in: context)
         diaryEntryFormController.context = self.context
+
+        diaryEntryFormController.saveProtocol = self
         navigationController?.pushViewController(diaryEntryFormController, animated: true)
     }
     
@@ -98,12 +93,14 @@ class DiaryListController: UIViewController {
 extension DiaryListController:UITableViewDelegate{
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let diaryEntry = data[indexPath.row]
-        print("Selected \(String(describing: diaryEntry.text))")
+        print("Selected an entry: \(String(describing: diaryEntry.text))")
         
         guard let diaryEntryFormController = storyboard?.instantiateViewController(withIdentifier: "DiaryEntryFormController") as? DiaryEntryFormController else { return }
         diaryEntryFormController.entry = diaryEntry
         diaryEntryFormController.context = self.context
-        diaryEntryFormController.indexPath = indexPath.row
+//        diaryEntryFormController.indexPath = indexPath.row
+        //NOTE: Activate the DiaryEntryForm delegate here instead of the location picker itself.
+        diaryEntryFormController.saveProtocol = self
         navigationController?.pushViewController(diaryEntryFormController, animated: true)
     }
 }
@@ -123,26 +120,34 @@ extension DiaryListController:UITableViewDataSource{
         cell.date.text = date.fullDate
         
         cell.diaryImage.roundImage()
-        cell.diaryImage.image = diaryEntry.convertImage
         
-        switch diaryEntry.mood {
-        case Mood.bad.rawValue:
-            cell.moodImage.roundImage()
-            cell.moodImage.image = UIImage(named: "icn_bad")
-        case Mood.average.rawValue:
-            cell.moodImage.roundImage()
-            cell.moodImage.image = UIImage(named: "icn_average")
-        case Mood.good.rawValue:
-            cell.moodImage.roundImage()
-            cell.moodImage.image = UIImage(named: "icn_happy")
-        default:
-            cell.moodImage.roundImage()
+        if let _ = diaryEntry.image{
+            cell.diaryImage.image = diaryEntry.uiImage
+        }
+        
+        if let mood = diaryEntry.mood{
+            switch mood {
+            case Mood.bad.rawValue:
+                cell.moodImage.roundImage()
+                cell.moodImage.image = UIImage(named: "icn_bad")
+            case Mood.average.rawValue:
+                cell.moodImage.roundImage()
+                cell.moodImage.image = UIImage(named: "icn_average")
+            case Mood.good.rawValue:
+                cell.moodImage.roundImage()
+                cell.moodImage.image = UIImage(named: "icn_happy")
+            default:
+                cell.moodImage.roundImage()
+            }
         }
         
         cell.diaryText.text = diaryEntry.text
-        
-        cell.location.setTitle(diaryEntry.locationName, for:[.normal])
-        
+
+        if let location = diaryEntry.location{
+            cell.location.setTitle("\(location)", for:[.normal])
+        }else{
+            cell.location.setTitle("Add location", for: .normal)
+        }
         return cell
     }
     
@@ -173,16 +178,9 @@ extension DiaryListController:UITableViewDataSource{
 }
 
 //Adopt the protocol to implement the protocol func and detect when back btn is tapped and when save btn is tapped.
-extension DiaryListController:BackPress,SavePress{
-
-    func didPressBack() {
-        print("Return from Entry Form using Back")
-        self.backPressed = true
-        print(backPressed)
-    }
+extension DiaryListController:SavePressProtocol{
     
     func didPressSave(){
-        print("Return from Entry Form using Save")
         updateTableView()
     }
 }
